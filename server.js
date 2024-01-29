@@ -25,9 +25,18 @@ connection.connect((err) => {
   }
   console.log('Conexión a la base de datos exitosa');
 });
-
-// Nuevo endpoint para insertar comentarios
-app.post('/api/comentarios', (req, res) => {
+// Función para actualizar los IDs en orden secuencial
+const actualizarIds = () => {
+    const sql = 'ALTER TABLE comentarios AUTO_INCREMENT = 1';
+    connection.query(sql, (err, result) => {
+      if (err) {
+        console.error('Error al restablecer la secuencia de IDs:', err);
+      }
+    });
+  };
+  
+  // Nuevo endpoint para insertar comentarios
+  app.post('/api/comentarios', (req, res) => {
     const { contenido } = req.body;
   
     if (!contenido) {
@@ -40,17 +49,15 @@ app.post('/api/comentarios', (req, res) => {
         console.error('Error al insertar comentario:', err);
         return res.status(500).json({ error: 'Error interno del servidor' });
       }
+  
       console.log('Comentario agregado con éxito');
       res.json({ success: true });
+      actualizarIds(); // Restablecer la secuencia de IDs después de agregar
     });
   });
   
-  app.listen(port, () => {
-    console.log(`Servidor escuchando en el puerto ${port}`);
-  });
-
-// Endpoint para obtener la lista de comentarios
-app.get('/api/comentarios', (req, res) => {
+  // Endpoint para obtener la lista de comentarios
+  app.get('/api/comentarios', (req, res) => {
     const sql = 'SELECT id, contenido FROM comentarios';
     connection.query(sql, (err, result) => {
       if (err) {
@@ -60,9 +67,9 @@ app.get('/api/comentarios', (req, res) => {
       res.json(result);
     });
   });
-
-  // Agrega este bloque al final de tu archivo server.js
-app.put('/api/comentarios/:id', (req, res) => {
+  
+  // Endpoint para editar un comentario
+  app.put('/api/comentarios/:id', (req, res) => {
     const { id } = req.params;
     const { nuevoContenido } = req.body;
   
@@ -79,11 +86,12 @@ app.put('/api/comentarios/:id', (req, res) => {
   
       console.log('Comentario editado con éxito');
       res.json({ success: true });
+      actualizarIds(); // Restablecer la secuencia de IDs después de editar
     });
   });
   
-// Agrega este bloque al final de tu archivo server.js
-app.delete('/api/comentarios', (req, res) => {
+  // Endpoint para eliminar comentarios
+  app.delete('/api/comentarios', (req, res) => {
     const { ids } = req.body;
   
     if (!Array.isArray(ids) || ids.length === 0) {
@@ -99,6 +107,10 @@ app.delete('/api/comentarios', (req, res) => {
   
       console.log('Comentarios eliminados con éxito');
       res.json({ success: true });
+      actualizarIds(); // Restablecer la secuencia de IDs después de eliminar
     });
   });
   
+  app.listen(port, () => {
+    console.log(`Servidor escuchando en el puerto ${port}`);
+  });

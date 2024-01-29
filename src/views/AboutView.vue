@@ -79,6 +79,7 @@ export default {
             if (data.success) {
               console.log('Comentario agregado con éxito');
               this.mostrarCrear = false;
+              this.cargarComentarios(); // Recargar la lista de comentarios después de agregar
             } else {
               console.error('Error al agregar comentario:', data.error);
             }
@@ -104,8 +105,7 @@ export default {
           if (data.success) {
             console.log('Comentario editado con éxito');
             this.mostrarEditar = false;
-            // Actualizar la lista de comentarios después de la edición
-            this.cargarComentarios();
+            this.cargarComentarios(); // Recargar la lista de comentarios después de editar
           } else {
             console.error('Error al editar comentario:', data.error);
           }
@@ -128,29 +128,22 @@ export default {
 
       const idsAEliminar = comentariosAEliminar.map(comentario => comentario.id);
 
-      // Hacer la solicitud al servidor para eliminar los comentarios seleccionados
       fetch('http://localhost:3000/api/comentarios', {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ids: idsAEliminar,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: idsAEliminar }),
       })
         .then(response => response.json())
         .then(data => {
           if (data.success) {
             console.log('Comentarios eliminados con éxito');
-            // Actualizar la lista de comentarios después de la eliminación
-            this.mostrarListaEliminar();
+            this.mostrarEliminar = false;
+            this.cargarComentarios(); // Recargar la lista de comentarios después de eliminar
           } else {
             console.error('Error al eliminar comentarios:', data.error);
           }
         })
-        .catch(error => {
-          console.error('Error de red al eliminar comentarios:', error);
-        });
+        .catch(error => console.error('Error de red al eliminar comentarios:', error));
     },
   },
 };
