@@ -8,15 +8,9 @@
     <!-- Cuadro de Crear/Editar Comentario -->
     <div v-if="mostrarCrear || mostrarEditar">
       <textarea v-if="mostrarCrear" v-model="nuevoComentario" placeholder="Ingresa tu comentario"></textarea>
-      <div v-else-if="mostrarEditar && comentarios.length > 0">
-        <select v-model="comentarioSeleccionado">
-          <option v-for="comentario in comentarios" :key="comentario.id" :value="comentario.id">{{ comentario.contenido }}</option>
-        </select>
-        <div v-if="comentarioSeleccionado !== null">
-          <textarea v-model="nuevoContenido" placeholder="Ingresa el nuevo contenido"></textarea>
-          <button @click="cargarNuevoContenido">Cargar</button>
-        </div>
-      </div>
+      <select v-if="mostrarEditar" v-model="comentarioSeleccionado">
+        <option v-for="comentario in comentarios" :key="comentario.id" :value="comentario.id">{{ comentario.contenido }}</option>
+      </select>
       <button @click="mostrarCrear ? agregarComentario() : editarComentario()">
         {{ mostrarCrear ? 'Agregar' : 'Editar' }}
       </button>
@@ -47,7 +41,6 @@ export default {
       mostrarEliminar: false,
       nuevoComentario: '',
       comentarioSeleccionado: null,
-      nuevoContenido: '',
       comentarios: [],
     };
   },
@@ -87,12 +80,9 @@ export default {
       }
     },
     editarComentario() {
-      // Limpiar datos antes de mostrar el cuadro de edición
-      this.nuevoComentario = '';
-      this.nuevoContenido = '';
-
-      this.mostrarCrear = false;
-      this.mostrarEliminar = false;
+      // Implementa la lógica para editar el comentario seleccionado
+      alert('Función para editar comentario');
+      this.mostrarEditar = false;
     },
     cargarComentarios() {
       fetch('http://localhost:3000/api/comentarios')
