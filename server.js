@@ -60,3 +60,45 @@ app.get('/api/comentarios', (req, res) => {
       res.json(result);
     });
   });
+
+  // Agrega este bloque al final de tu archivo server.js
+app.put('/api/comentarios/:id', (req, res) => {
+    const { id } = req.params;
+    const { nuevoContenido } = req.body;
+  
+    if (!id || !nuevoContenido) {
+      return res.status(400).json({ error: 'ID y nuevo contenido son obligatorios' });
+    }
+  
+    const sql = 'UPDATE comentarios SET contenido = ? WHERE id = ?';
+    connection.query(sql, [nuevoContenido, id], (err, result) => {
+      if (err) {
+        console.error('Error al editar comentario:', err);
+        return res.status(500).json({ error: 'Error interno del servidor' });
+      }
+  
+      console.log('Comentario editado con éxito');
+      res.json({ success: true });
+    });
+  });
+  
+// Agrega este bloque al final de tu archivo server.js
+app.delete('/api/comentarios', (req, res) => {
+    const { ids } = req.body;
+  
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'Debe proporcionar un array de IDs válidos' });
+    }
+  
+    const sql = 'DELETE FROM comentarios WHERE id IN (?)';
+    connection.query(sql, [ids], (err, result) => {
+      if (err) {
+        console.error('Error al eliminar comentarios:', err);
+        return res.status(500).json({ error: 'Error interno del servidor' });
+      }
+  
+      console.log('Comentarios eliminados con éxito');
+      res.json({ success: true });
+    });
+  });
+  

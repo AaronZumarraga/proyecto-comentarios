@@ -8,9 +8,15 @@
     <!-- Cuadro de Crear/Editar Comentario -->
     <div v-if="mostrarCrear || mostrarEditar">
       <textarea v-if="mostrarCrear" v-model="nuevoComentario" placeholder="Ingresa tu comentario"></textarea>
-      <select v-if="mostrarEditar" v-model="comentarioSeleccionado">
-        <option v-for="comentario in comentarios" :key="comentario.id" :value="comentario.id">{{ comentario.contenido }}</option>
-      </select>
+      <div v-if="mostrarEditar">
+        <select v-model="comentarioSeleccionado">
+          <option v-for="comentario in comentarios" :key="comentario.id" :value="comentario.id">{{ comentario.contenido }}</option>
+        </select>
+        <div v-if="comentarioSeleccionado">
+          <input type="text" v-model="nuevoContenido" placeholder="Nuevo contenido" />
+          <button @click="editarComentario">Cargar</button>
+        </div>
+      </div>
       <button @click="mostrarCrear ? agregarComentario() : editarComentario()">
         {{ mostrarCrear ? 'Agregar' : 'Editar' }}
       </button>
@@ -40,6 +46,7 @@ export default {
       mostrarEditar: false,
       mostrarEliminar: false,
       nuevoComentario: '',
+      nuevoContenido: '',
       comentarioSeleccionado: null,
       comentarios: [],
     };
@@ -80,9 +87,30 @@ export default {
       }
     },
     editarComentario() {
-      // Implementa la lógica para editar el comentario seleccionado
-      alert('Función para editar comentario');
-      this.mostrarEditar = false;
+      const idComentario = this.comentarioSeleccionado;
+
+      if (!idComentario || this.nuevoContenido.trim() === '') {
+        console.log('Por favor, selecciona un comentario y proporciona un nuevo contenido.');
+        return;
+      }
+
+      fetch(`http://localhost:3000/api/comentarios/${idComentario}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nuevoContenido: this.nuevoContenido }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            console.log('Comentario editado con éxito');
+            this.mostrarEditar = false;
+            // Actualizar la lista de comentarios después de la edición
+            this.cargarComentarios();
+          } else {
+            console.error('Error al editar comentario:', data.error);
+          }
+        })
+        .catch(error => console.error('Error de red al editar comentario:', error));
     },
     cargarComentarios() {
       fetch('http://localhost:3000/api/comentarios')
@@ -100,21 +128,29 @@ export default {
 
       const idsAEliminar = comentariosAEliminar.map(comentario => comentario.id);
 
+      // Hacer la solicitud al servidor para eliminar los comentarios seleccionados
       fetch('http://localhost:3000/api/comentarios', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: idsAEliminar }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ids: idsAEliminar,
+        }),
       })
         .then(response => response.json())
         .then(data => {
           if (data.success) {
             console.log('Comentarios eliminados con éxito');
-            this.mostrarListaEliminar(); // Actualizar la lista de comentarios después de la eliminación
+            // Actualizar la lista de comentarios después de la eliminación
+            this.mostrarListaEliminar();
           } else {
             console.error('Error al eliminar comentarios:', data.error);
           }
         })
-        .catch(error => console.error('Error de red al eliminar comentarios:', error));
+        .catch(error => {
+          console.error('Error de red al eliminar comentarios:', error);
+        });
     },
   },
 };
