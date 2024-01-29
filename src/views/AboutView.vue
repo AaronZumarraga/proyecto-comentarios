@@ -8,9 +8,16 @@
     <!-- Cuadro de Crear/Editar Comentario -->
     <div v-if="mostrarCrear || mostrarEditar">
       <textarea v-if="mostrarCrear" v-model="nuevoComentario" placeholder="Ingresa tu comentario"></textarea>
-      <select v-if="mostrarEditar" v-model="comentarioSeleccionado">
-        <option v-for="comentario in comentarios" :key="comentario.id" :value="comentario.id">{{ comentario.contenido }}</option>
-      </select>
+      <div v-if="mostrarEditar">
+        <select v-model="comentarioSeleccionado">
+          <option v-for="comentario in comentarios" :key="comentario.id" :value="comentario.id">{{ comentario.contenido }}
+          </option>
+        </select>
+        <div v-if="comentarioSeleccionado">
+          <input type="text" v-model="nuevoContenido" placeholder="Nuevo contenido" />
+          <button @click="editarComentario">Cargar</button>
+        </div>
+      </div>
       <button @click="mostrarCrear ? agregarComentario() : editarComentario()">
         {{ mostrarCrear ? 'Agregar' : 'Editar' }}
       </button>
@@ -40,6 +47,7 @@ export default {
       mostrarEditar: false,
       mostrarEliminar: false,
       nuevoComentario: '',
+      nuevoContenido: '',
       comentarioSeleccionado: null,
       comentarios: [],
     };
@@ -72,6 +80,7 @@ export default {
             if (data.success) {
               console.log('Comentario agregado con éxito');
               this.mostrarCrear = false;
+              this.cargarComentarios(); // Recargar la lista de comentarios después de agregar
             } else {
               console.error('Error al agregar comentario:', data.error);
             }
@@ -80,9 +89,29 @@ export default {
       }
     },
     editarComentario() {
-      // Implementa la lógica para editar el comentario seleccionado
-      alert('Función para editar comentario');
-      this.mostrarEditar = false;
+      const idComentario = this.comentarioSeleccionado;
+
+      if (!idComentario || this.nuevoContenido.trim() === '') {
+        console.log('Por favor, selecciona un comentario y proporciona un nuevo contenido.');
+        return;
+      }
+
+      fetch(`http://localhost:3000/api/comentarios/${idComentario}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nuevoContenido: this.nuevoContenido }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            console.log('Comentario editado con éxito');
+            this.mostrarEditar = false;
+            this.cargarComentarios(); // Recargar la lista de comentarios después de editar
+          } else {
+            console.error('Error al editar comentario:', data.error);
+          }
+        })
+        .catch(error => console.error('Error de red al editar comentario:', error));
     },
     cargarComentarios() {
       fetch('http://localhost:3000/api/comentarios')
@@ -109,7 +138,8 @@ export default {
         .then(data => {
           if (data.success) {
             console.log('Comentarios eliminados con éxito');
-            this.mostrarListaEliminar(); // Actualizar la lista de comentarios después de la eliminación
+            this.mostrarEliminar = false;
+            this.cargarComentarios(); // Recargar la lista de comentarios después de eliminar
           } else {
             console.error('Error al eliminar comentarios:', data.error);
           }
@@ -121,21 +151,21 @@ export default {
 </script>
 
 <style scoped>
-  body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin: 20px;
-  }
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 20px;
+}
 
-  button {
-    padding: 10px;
-    margin: 5px;
-    font-size: 16px;
-  }
+button {
+  padding: 10px;
+  margin: 5px;
+  font-size: 16px;
+}
 
-  textarea {
-    width: 100%;
-    height: 100px;
-    margin-bottom: 10px;
-  }
+textarea {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 10px;
+}
 </style>
