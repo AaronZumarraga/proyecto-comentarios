@@ -10,7 +10,8 @@
       <textarea v-if="mostrarCrear" v-model="nuevoComentario" placeholder="Ingresa tu comentario"></textarea>
       <div v-if="mostrarEditar">
         <select v-model="comentarioSeleccionado">
-          <option v-for="comentario in comentarios" :key="comentario.id" :value="comentario.id">{{ comentario.contenido }}</option>
+          <option v-for="comentario in comentarios" :key="comentario.id" :value="comentario.id">{{ comentario.contenido }}
+          </option>
         </select>
         <div v-if="comentarioSeleccionado">
           <input type="text" v-model="nuevoContenido" placeholder="Nuevo contenido" />
@@ -150,21 +151,21 @@ export default {
 </script>
 
 <style scoped>
-  body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin: 20px;
-  }
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 20px;
+}
 
-  button {
-    padding: 10px;
-    margin: 5px;
-    font-size: 16px;
-  }
+button {
+  padding: 10px;
+  margin: 5px;
+  font-size: 16px;
+}
 
-  textarea {
-    width: 100%;
-    height: 100px;
-    margin-bottom: 10px;
-  }
+textarea {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 10px;
+}
 </style>
